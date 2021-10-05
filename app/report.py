@@ -4,7 +4,13 @@ from flask import (
 from werkzeug.exceptions import abort
 
 from app.auth import login_required
-from app.db import get_db
+from app.models import db
+import pandas as pd
+import json
+import plotly
+import plotly.express as px
+
+
 
 bp = Blueprint('reports', __name__)
 

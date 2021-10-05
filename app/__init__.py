@@ -1,11 +1,7 @@
 from flask import Flask, render_template
 import pyodbc
-import pandas as pd
-import json
-import plotly
-import plotly.express as px
 import os
-from . import db, auth, report
+from . import models, auth, report
 
 
 def create_app(test_config=None):
@@ -13,7 +9,7 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'))
+        SQLALCHEMY_DATABASE_URI=os.path.join(app.instance_path, 'sqlite:///reports.db'))
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile('config.py', silent=True)
@@ -34,7 +30,7 @@ def create_app(test_config=None):
     cnxn = pyodbc.connect(
         'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + server + ';DATABASE=' + database + ';UID=' + username + ';PWD=' + password)
 
-    db.init_app(app)
+    models.init_app(app)
     app.register_blueprint(auth.bp)
     app.register_blueprint(report.bp)
     app.add_url_rule('/', endpoint='index')

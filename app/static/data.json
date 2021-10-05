@@ -1,0 +1,41 @@
+{
+  "Users": [
+    {"id": 1,"username": "admin", "password": "admin"}
+  ],
+  "Reports": [
+    {"id": 1, "name": "Report Test", "user_id": 1}
+  ],
+  "DefaultGraphs": [
+    {"id": 1,"name": "Graph 1",
+      "query": "SELECT COUNT(CI.LETRA) AS NumeroDeCasosEfermedadesRespiratorias,CI.Letra,DI.CalendarYear as Year,CL.Asentamiento AS Colonia,CL.Nombre_De_La_Localidad FROM [SEDESA].[SAEH].[Defunciones] AS DE INNER JOIN [Catalogos].[DimDate] AS DI ON DE.Id_DimDate=DI.DateKey INNER JOIN [Catalogos].[Cat_CLUES] AS CL ON DE.[Id_CLUE]=CL.Id_CLUE INNER JOIN [Catalogos].[Cat_CIE] AS CI ON DE.Id_CIE=CI.Id_CIE WHERE CI.Letra='{letter}' GROUP BY CL.Asentamiento,CI.Letra,DI.CalendarYear,CL.Nombre_De_La_Localidad order by 3,1 desc",
+      "type": "bar"}
+  ],
+  "DefaultFields": [
+    {"id": 1, "name": "year", "type": "String", "description": "año con formato YYYY"},
+    {"id": 2, "name": "gender", "type": "String", "description": "genero masculino o femenino"},
+    {"id": 3, "name": "letter", "type": "String", "description": "Letra de la clave CIE10"}
+  ],
+  "DefaultGraphFields": [
+    {"default_graph_id": 1,"default_field_id": 1},
+    {"default_graph_id": 1,"default_field_id": 2},
+    {"default_graph_id": 1,"default_field_id": 3}
+  ],
+  "SavedField": [
+    {"id": 1,
+      "name": "letter",
+      "value": "J",
+      "default_field_id": 3,
+      "graph_id": 1
+    }
+  ],
+  "SavedGraph": [
+    {"id": 1,
+      "query": "SELECT COUNT(CI.LETRA) AS NumeroDeCasosEfermedadesRespiratorias,CI.Letra,DI.CalendarYear as Year,CL.Asentamiento AS Colonia,CL.Nombre_De_La_Localidad FROM [SEDESA].[SAEH].[Defunciones] AS DE INNER JOIN [Catalogos].[DimDate] AS DI ON DE.Id_DimDate=DI.DateKey INNER JOIN [Catalogos].[Cat_CLUES] AS CL ON DE.[Id_CLUE]=CL.Id_CLUE INNER JOIN [Catalogos].[Cat_CIE] AS CI ON DE.Id_CIE=CI.Id_CIE WHERE CI.Letra='{letter}' GROUP BY CL.Asentamiento,CI.Letra,DI.CalendarYear,CL.Nombre_De_La_Localidad order by 3,1 desc",
+      "name": "Graph 1",
+      "order": 1,
+      "type": "bar",
+      "user_id": 1,
+      "report_id": 1
+    }
+  ]
+}
