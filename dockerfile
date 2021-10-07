@@ -13,5 +13,6 @@ RUN wget \
     && bash Miniconda3-latest-Linux-x86_64.sh -b \
     && rm -f Miniconda3-latest-Linux-x86_64.sh
 RUN conda --version
+RUN conda env list
 RUN conda env create -f dashboard.yml
 RUN conda activate dashboard
