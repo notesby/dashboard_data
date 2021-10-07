@@ -3,60 +3,78 @@ import os.path
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import json
+import pyodbc
 
 db = SQLAlchemy()
+connection = None
 
 
 def init_app(app):
     db.init_app(app)
     app.app_context().push()
     db.create_all()
+    init_connection()
     return db
+
+
+def init_connection():
+    global connection
+    server = 'DESKTOP-VLGTJDQ\MSSQLSERVER2019'
+    database = 'Sedesa'
+    username = 'dash'
+    password = 'dash92'
+    connection = pyodbc.connect(
+        'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + server + ';DATABASE=' + database + ';UID=' + username + ';PWD=' + password)
+    return connection
+
+
+def get_connection():
+    return connection
 
 
 def load_data():
     data = None
     root = os.path.realpath(os.path.dirname(__file__))
-    json_path = os.path.join(root,"static","data.json")
-    with open(json_path) as f:
+    json_path = os.path.join(root, "static", "data.json")
+    with open(json_path, encoding="utf-8") as f:
         data = json.load(f)
     if data is not None:
         for row in data["Users"]:
-            user1 = User(id=row["id"], username=row["username"], password=row["password"])
-            db.session.add(user1)
+            _ = insert_or_update(User, row)
         for row in data["Reports"]:
-            new_entry = Report(id=row["id"], name=row["name"], user_id=row["user_id"])
-            db.session.add(new_entry)
+            _ = insert_or_update(Report, row)
+        delete_relationship = default_graph_default_fields.delete()
+        db.session.execute(delete_relationship)
         for row in data["DefaultGraphs"]:
-            new_entry = DefaultGraph(id=row["id"], name=row["name"])
-            new_entry.query = row["query"]
-            new_entry.type = row["type"]
-            db.session.add(new_entry)
+            _ = insert_or_update(DefaultGraph, row)
         for row in data["DefaultFields"]:
-            new_entry = DefaultField(id=row["id"], name=row["name"])
-            new_entry.description = row["description"]
-            new_entry.type = row["type"]
-            db.session.add(new_entry)
+            _ = insert_or_update(DefaultField, row)
         for row in data["DefaultGraphFields"]:
             new_entry = default_graph_default_fields.insert().values(default_graph_id=row["default_graph_id"],
                                                                      default_field_id=row["default_field_id"])
             db.session.execute(new_entry)
         for row in data["SavedField"]:
-            new_entry = SavedField(id=row["id"], name=row["name"])
-            new_entry.value = row["value"]
-            new_entry.default_field_id = row["default_field_id"]
-            new_entry.graph_id = row["graph_id"]
-            db.session.add(new_entry)
+            _ = insert_or_update(SavedField, row)
         for row in data["SavedGraph"]:
-            new_entry = SavedGraph(id=row["id"], name=row["name"])
-            new_entry.query = row["query"]
-            new_entry.order = row["order"]
-            new_entry.type = row["type"]
-            new_entry.user_id = row["user_id"]
-            new_entry.report_id = row["report_id"]
-            db.session.add(new_entry)
+            _ = insert_or_update(SavedGraph, row)
     db.session.commit()
     print("data loaded successfully")
+
+
+def insert_or_update(model_class, values):
+    print(model_class)
+    entry = None
+    added = False
+    if "id" in values:
+        entry = model_class.query.filter_by(id=values["id"]).first()
+    if not entry:
+        entry = model_class()
+        added = True
+    for key in values:
+        setattr(entry, key, values[key])
+    if added:
+        db.session.add(entry)
+    return entry
 
 
 class User(db.Model):
@@ -82,8 +100,10 @@ class Report(db.Model):
 
 class SavedGraph(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    query = db.Column(db.Text, nullable=False)
+    query_text = db.Column(db.Text, nullable=False)
     name = db.Column(db.String(200), nullable=False)
+    graph_options = db.Column(db.JSON, nullable=True)
+    geojson = db.Column(db.Text, nullable=True)
     order = db.Column(db.Integer, nullable=False)
     type = db.Column(db.String(150), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -93,6 +113,7 @@ class SavedGraph(db.Model):
     report_id = db.Column(db.Integer, db.ForeignKey('report.id'), nullable=False)
     report = db.relationship('Report', backref=db.backref('graphs', lazy=True))
     fields = db.relationship('SavedField', back_populates='graphs')
+    image = None
 
     def __repr__(self):
         return '<SavedGraph %r>' % self.name
@@ -107,6 +128,7 @@ class SavedField(db.Model):
     default_field_id = db.Column(db.Integer, db.ForeignKey('default_field.id'))
     default_field = db.relationship('DefaultField', back_populates='saved_fields')
 
+
     def __repr__(self):
         return '<SavedField %r>' % self.name
 
@@ -118,7 +140,7 @@ default_graph_default_fields = db.Table('default_graph_default_fields', db.metad
 
 class DefaultGraph(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    query = db.Column(db.Text, nullable=False)
+    query_text = db.Column(db.Text, nullable=False)
     name = db.Column(db.String(200), nullable=False)
     type = db.Column(db.String(150), nullable=False)
     fields = db.relationship('DefaultField', default_graph_default_fields, back_populates='graphs')

@@ -1,0 +1,28 @@
+{%extends 'base.html'%}
+
+{% block header %}
+    <h1>{% block title %} Graficas {% endblock %}</h1>
+    {% if g.user %}
+        <a class="action" href="{{ url_for('graph.create') }}">Nuevo</a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+  {% for graph in graphs %}
+    <article class="post">
+      <header>
+        <div>
+          <h1><a href="{{ url_for('graph.get_graph_by', graph_id=graph['id']) }}">{{ graph['name'] }}</a></h1>
+          <div class="about">by {{ graph['created_by']['username'] }} on {{ graph['created_at'].strftime('%Y-%m-%d') }}</div>
+          <img src="{{ graph['image']['data'] }}">
+        </div>
+        {% if g.user['id'] == graph['created_by'] %}
+          <a class="action" href="{{ url_for('graph.update', id=graph['id']) }}">Edit</a>
+        {% endif %}
+      </header>
+    </article>
+    {% if not loop.last %}
+      <hr>
+    {% endif %}
+  {% endfor %}
+{% endblock %}

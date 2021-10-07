@@ -4,12 +4,11 @@ from flask import (
 from werkzeug.exceptions import abort
 
 from app.auth import login_required
-from app.models import db
+from app.models import db, Report
 import pandas as pd
 import json
 import plotly
 import plotly.express as px
-
 
 
 bp = Blueprint('reports', __name__)
@@ -17,7 +16,8 @@ bp = Blueprint('reports', __name__)
 
 @bp.route('/')
 def index():
-    return render_template('index.html')
+    reports = Report.query.all()
+    return render_template('reports.html', reports=reports)
 
 
 @bp.route('/chart1')
