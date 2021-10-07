@@ -1,6 +1,8 @@
 FROM python:3.9.1
 ADD . /dashboard2
 WORKDIR /dashboard2
+ENV PATH="/root/miniconda3/bin:${PATH}"
+ARG PATH="/root/miniconda3/bin:${PATH}"
 RUN apt-get update
 
 RUN apt-get install -y wget && rm -rf /var/lib/apt/lists/*
