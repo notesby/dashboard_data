@@ -59,8 +59,6 @@ def run_query(query, fields):
     connection = get_connection()
     clean_query = query
     for field in fields:
-        print(field.name, file=sys.stderr)
-        print(field.value, file=sys.stderr)
         clean_query = clean_query.replace(f"{{{field.name}}}", f"{field.value}")
     print(clean_query, file=sys.stderr)
     df1 = pd.read_sql(clean_query, connection)
