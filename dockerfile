@@ -1,33 +1,23 @@
-#FROM python:3.9.1
 FROM continuumio/anaconda3
 ADD . /dashboard2
 WORKDIR /dashboard2
-#ENV PATH="/root/miniconda3/bin:${PATH}"
-#ARG PATH="/root/miniconda3/bin:${PATH}"
-#RUN apt-get update
+RUN rm -rf /var/lib/apt/lists/*
+RUN apt-get update
+RUN apt-get install -y gnupg2
+RUN apt-get install -y wget
 
-#RUN apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+RUN curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list
 
-#RUN wget \
-#    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-#    && mkdir /root/.conda \
-#    && bash Miniconda3-latest-Linux-x86_64.sh -b \
-#    && rm -f Miniconda3-latest-Linux-x86_64.sh
+RUN apt-get update
+RUN ACCEPT_EULA=Y apt-get install -y msodbcsql17
+RUN apt-get install -y unixodbc-dev
+
 #RUN conda init bash
 #RUN conda --version
 #RUN conda activate dashboard
 
-<<<<<<< Updated upstream
-RUN wget \
-    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-    && mkdir /root/.conda \
-    && bash Miniconda3-latest-Linux-x86_64.sh -b \
-    && rm -f Miniconda3-latest-Linux-x86_64.sh
-RUN conda --version
-RUN conda env list
-=======
->>>>>>> Stashed changes
 RUN conda env create -f dashboard.yml
-RUN echo "conda activate env" > ~/.bashrc
-ENV PATH /opt/conda/envs/env/bin:$PATH
+RUN echo "conda activate dashboard" > ~/.bashrc
+ENV PATH /opt/conda/envs/dashboard/bin:$PATH
 
