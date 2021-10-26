@@ -1,14 +1,16 @@
-<!doctype html>
-<html>
-<body style="font-family:arial, sans-serif">
-    <h1>Plotly chart</h1>
-    <h3><a href="/">Return to index page</a></h3>
-    <div id="chart" class="chart"></div>
-</body>
+{%extends 'base.html'%}
 
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script type="text/javascript">
-    var graphs = {{graphJSON | safe}};
-    Plotly.plot('chart',graphs,{});        
-</script>
-</html>
+{% block header %}
+    <h1>{% block title %} Grafica {% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <div id="chart" class="chart"></div>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="text/javascript">
+        var graphs = {{graphJSON | safe}};
+        Plotly.plot('chart',graphs,{});
+    </script>
+{% endblock %}
+
+

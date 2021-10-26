@@ -8,20 +8,24 @@
 {% endblock %}
 
 {% block content %}
-  {% for report in reports %}
-    <article class="post">
-      <header>
-        <div>
-          <h1><a class="action" href="{{ url_for('graph.index', report_id=report['id']) }}">{{ report['name'] }}</a></h1>
-          <div class="about">by {{ report['created_by']['username'] }} on {{ report['created_at'].strftime('%Y-%m-%d') }}</div>
-        </div>
-        {% if g.user['id'] == report['created_by'] %}
-          <a class="action" href="{{ url_for('report.update', id=report['id']) }}">Edit</a>
-        {% endif %}
-      </header>
-    </article>
-    {% if not loop.last %}
-      <hr>
-    {% endif %}
-  {% endfor %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Name</th>
+          <th scope="col">Author</th>
+          <th scope="col">Created at</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for report in reports %}
+        <tr>
+          <th scope="row">{{ loop.index0+1 }}</th>
+          <td><a class="action" href="{{ url_for('graph.index', report_id=report['id']) }}">{{ report['name'] }}</a></td>
+          <td>{{ report['created_by']['username'] }}</td>
+          <td>{{ report['created_at'].strftime('%Y-%m-%d') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 {% endblock %}

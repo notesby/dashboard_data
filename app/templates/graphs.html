@@ -8,21 +8,18 @@
 {% endblock %}
 
 {% block content %}
-  {% for graph in graphs %}
-    <article class="post">
-      <header>
-        <div>
-          <h1><a href="{{ url_for('graph.get_graph_by', graph_id=graph['id']) }}">{{ graph['name'] }}</a></h1>
-          <div class="about">by {{ graph['created_by']['username'] }} on {{ graph['created_at'].strftime('%Y-%m-%d') }}</div>
-          <img src="{{ graph['image']['data'] }}">
+  <div class="row row-cols-1 row-cols-md-2 g-4">
+    {% for graph in graphs %}
+      <div class="col">
+        <div class="card">
+          <img src="{{ graph['image']['data'] }}" class="card-img-top" alt="...">
+          <div class="card-body">
+              <h5 class="card-title"><a href="{{ url_for('graph.get_graph_by', graph_id=graph['id']) }}">{{ graph['name'] }}</a></h5>
+            <p class="card-text">Created by {{ graph['created_by']['username'] }}.</p>
+            <p class="card-text"><small class="text-muted">Last updated {{ graph['created_at'].strftime('%Y-%m-%d') }}</small></p>
+          </div>
         </div>
-        {% if g.user['id'] == graph['created_by'] %}
-          <a class="action" href="{{ url_for('graph.update', id=graph['id']) }}">Edit</a>
-        {% endif %}
-      </header>
-    </article>
-    {% if not loop.last %}
-      <hr>
-    {% endif %}
-  {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
 {% endblock %}
