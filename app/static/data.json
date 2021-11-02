@@ -1,6 +1,6 @@
 {
   "Users": [
-    {"id": 1,"username": "admin", "password": "admin"}
+    {"id": 1,"username": "admin", "password": {"value": "admin", "hash": true}}
   ],
   "Reports": [
     {"id": 1, "name": "Report Test", "user_id": 1},
@@ -9,9 +9,12 @@
     {"id": 4, "name": "Report Test 4", "user_id": 1}
   ],
   "DefaultGraphs": [
-    {"id": 1,"name": "Graph 1",
+    {"id": 1,
+      "name": "Graph 1",
       "query_text": "SELECT COUNT(CI.LETRA) AS NumeroDeCasosEfermedadesRespiratorias,CI.Letra,DI.CalendarYear as Year,CL.Asentamiento AS Colonia,CL.Nombre_De_La_Localidad FROM [SEDESA].[SAEH].[Defunciones] AS DE INNER JOIN [Catalogos].[DimDate] AS DI ON DE.Id_DimDate=DI.DateKey INNER JOIN [Catalogos].[Cat_CLUES] AS CL ON DE.[Id_CLUE]=CL.Id_CLUE INNER JOIN [Catalogos].[Cat_CIE] AS CI ON DE.Id_CIE=CI.Id_CIE WHERE CI.Letra='{letter}' GROUP BY CL.Asentamiento,CI.Letra,DI.CalendarYear,CL.Nombre_De_La_Localidad order by 3,1 desc",
-      "type": "bar"}
+      "type": "bar",
+      "order": 1
+    }
   ],
   "DefaultFields": [
     {"id": 1, "name": "year", "type": "String", "description": "año con formato YYYY"},

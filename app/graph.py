@@ -1,10 +1,10 @@
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for
+    Blueprint, flash, g, redirect, render_template, request, url_for, session
 )
 from werkzeug.exceptions import abort
 
 from app.auth import login_required
-from app.models import db, SavedGraph
+from app.models import db, SavedGraph, DefaultGraph, DefaultField
 from app.models import get_connection
 from base64 import b64encode
 import pandas as pd
@@ -13,7 +13,6 @@ import plotly
 import plotly.express as px
 import sys
 import os
-
 
 bp = Blueprint('graph', __name__)
 
@@ -30,7 +29,7 @@ def index(report_id):
         fig = generate_graph(data, geojson, graph.graph_options, graph.type)
         graphs[i].image = display_graph(fig, "image")
 
-    return render_template('graphs.html', graphs=graphs)
+    return render_template('graphs.html', graphs=graphs, report_id=report_id)
 
 
 @bp.route('/graph/<int:graph_id>/', methods=['GET', 'POST'])
@@ -44,6 +43,46 @@ def get_graph_by(graph_id):
     graph.image = display_graph(fig, "Graph")
 
     return render_template('notdash.html', graphJSON=graph.image["data"])
+
+
+@bp.route('/<int:report_id>/graphs/create', methods=['GET', 'POST'])
+@login_required
+def create(report_id):
+    if request.method == 'POST':
+        default_graph_id = request.form['graph_id']
+        name = request.form['name']
+        graph_options = request.form['graph_options']
+        geojson = request.form['geojson']
+        graph_type = request.form['type']
+        order = request.form['order']
+        user_id = session.get('user_id')
+        print(request.form['field'])
+
+        default_graph = DefaultGraph.query.filter_by(id=default_graph_id).first()
+        graph = SavedGraph()
+        graph.name = name
+        graph.query_text = default_graph.query_text
+        graph.type = graph_type
+        graph.order = order
+        graph.report_id = report_id
+        graph.graph_options = json.loads(graph_options)
+        graph.geojson = geojson
+        graph.user_id = user_id
+        db.session.add(graph)
+        db.session.commit()
+        return redirect(url_for("graph.index", report_id=report_id))
+    default_graphs = DefaultGraph.query.all()
+    graphs_json = json.dumps([o.serialize for o in default_graphs])
+    fields = []
+    for graph in default_graphs:
+        for field in graph.fields:
+            field.graph_ids.add(graph.id)
+            fields.append(field)
+    fields_json = json.dumps([o.serialize for o in fields])
+    return render_template('addgraph.html',
+                           graphs=default_graphs,
+                           graphs_json=graphs_json,
+                           fields_json=fields_json)
 
 
 def load_geojson(file_name):

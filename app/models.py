@@ -1,5 +1,6 @@
 import os.path
 
+from werkzeug.security import generate_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import json
@@ -71,7 +72,19 @@ def insert_or_update(model_class, values):
         entry = model_class()
         added = True
     for key in values:
-        setattr(entry, key, values[key])
+        value = values[key]
+        if type(value) == dict:
+            if "hash" in value:
+                if value["hash"]:
+                    hashed = generate_password_hash(value["value"])
+                    setattr(entry, key, hashed)
+                else:
+                    setattr(entry, key, value["value"])
+            else:
+                setattr(entry, key, value)
+        else:
+            setattr(entry, key, value)
+
     if added:
         db.session.add(entry)
     return entry
@@ -142,8 +155,23 @@ class DefaultGraph(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     query_text = db.Column(db.Text, nullable=False)
     name = db.Column(db.String(200), nullable=False)
+    graph_options = db.Column(db.JSON, nullable=True)
+    geojson = db.Column(db.Text, nullable=True)
+    order = db.Column(db.Integer, nullable=False, default=0)
     type = db.Column(db.String(150), nullable=False)
     fields = db.relationship('DefaultField', default_graph_default_fields, back_populates='graphs')
+
+    @property
+    def serialize(self):
+        res = dict()
+        res["id"] = self.id
+        res["name"] = self.name
+        res["query_text"] = self.query_text
+        res["type"] = self.type
+        res["graph_options"] = self.graph_options
+        res["geojson"] = self.geojson
+        res["order"] = self.order
+        return res
 
     def __repr__(self):
         return '<DefaultGraph %r>' % self.name
@@ -156,6 +184,17 @@ class DefaultField(db.Model):
     description = db.Column(db.String(400), nullable=False)
     graphs = db.relationship('DefaultGraph', default_graph_default_fields, back_populates='fields')
     saved_fields = db.relationship('SavedField', back_populates='default_field')
+    graph_ids = set()
+
+    @property
+    def serialize(self):
+        res = dict()
+        res["id"] = self.id
+        res["name"] = self.name
+        res["type"] = self.type
+        res["description"] = self.description
+        res["graph_ids"] = list(self.graph_ids)
+        return res
 
     def __repr__(self):
         return '<DefaultField %r>' % self.name

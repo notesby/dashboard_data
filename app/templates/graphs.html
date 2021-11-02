@@ -3,7 +3,7 @@
 {% block header %}
     <h1>{% block title %} Graficas {% endblock %}</h1>
     {% if g.user %}
-        <a class="action" href="{{ url_for('graph.create') }}">Nuevo</a>
+        <a class="action" href="{{ url_for('graph.create', report_id=report_id) }}">Nuevo</a>
     {% endif %}
 {% endblock %}
 
