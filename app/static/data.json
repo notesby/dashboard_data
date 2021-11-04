@@ -13,7 +13,55 @@
       "name": "Graph 1",
       "query_text": "SELECT COUNT(CI.LETRA) AS NumeroDeCasosEfermedadesRespiratorias,CI.Letra,DI.CalendarYear as Year,CL.Asentamiento AS Colonia,CL.Nombre_De_La_Localidad FROM [SEDESA].[SAEH].[Defunciones] AS DE INNER JOIN [Catalogos].[DimDate] AS DI ON DE.Id_DimDate=DI.DateKey INNER JOIN [Catalogos].[Cat_CLUES] AS CL ON DE.[Id_CLUE]=CL.Id_CLUE INNER JOIN [Catalogos].[Cat_CIE] AS CI ON DE.Id_CIE=CI.Id_CIE WHERE CI.Letra='{letter}' GROUP BY CL.Asentamiento,CI.Letra,DI.CalendarYear,CL.Nombre_De_La_Localidad order by 3,1 desc",
       "type": "bar",
-      "order": 1
+      "order": 1,
+      "graph_options": {
+        "x": "Nombre_De_La_Localidad",
+        "y": "NumeroDeCasosEfermedadesRespiratorias",
+        "color": "Year",
+        "barmode": "group",
+        "labels": {
+          "Nombre_De_La_Localidad": "Localidades",
+          "NumeroDeCasosEfermedadesRespiratorias": "No. de casos",
+          "Year": "Años"
+        },
+        "title": "Numero de casos de enfermedades respiratorias por localidad"
+      }
+    },
+    {"id": 2,
+      "name": "Graph 2",
+      "query_text": "SELECT COUNT(CI.LETRA) AS NumeroDeCasosEfermedadesRespiratorias,CI.Letra,DI.CalendarYear as Year,CL.Asentamiento AS Colonia,CL.Nombre_De_La_Localidad FROM [SEDESA].[SAEH].[Defunciones] AS DE INNER JOIN [Catalogos].[DimDate] AS DI ON DE.Id_DimDate=DI.DateKey INNER JOIN [Catalogos].[Cat_CLUES] AS CL ON DE.[Id_CLUE]=CL.Id_CLUE INNER JOIN [Catalogos].[Cat_CIE] AS CI ON DE.Id_CIE=CI.Id_CIE WHERE CI.Letra='{letter}' GROUP BY CL.Asentamiento,CI.Letra,DI.CalendarYear,CL.Nombre_De_La_Localidad order by 3,1 desc",
+      "type": "bar",
+      "order": 1,
+      "graph_options": {
+        "x": "Nombre_De_La_Localidad",
+        "y": "NumeroDeCasosEfermedadesRespiratorias",
+        "color": "Year",
+        "barmode": "group",
+        "labels": {
+          "Nombre_De_La_Localidad": "Localidades",
+          "NumeroDeCasosEfermedadesRespiratorias": "No. de casos",
+          "Year": "Años"
+        },
+        "title": "Numero de casos de enfermedades respiratorias por localidad"
+      }
+    },
+    {"id": 3,
+      "name": "Graph 3",
+      "query_text": "SELECT COUNT(CI.LETRA) AS NumeroDeCasosEfermedadesRespiratorias,CI.Letra,DI.CalendarYear as Year,CL.Asentamiento AS Colonia,CL.Nombre_De_La_Localidad FROM [SEDESA].[SAEH].[Defunciones] AS DE INNER JOIN [Catalogos].[DimDate] AS DI ON DE.Id_DimDate=DI.DateKey INNER JOIN [Catalogos].[Cat_CLUES] AS CL ON DE.[Id_CLUE]=CL.Id_CLUE INNER JOIN [Catalogos].[Cat_CIE] AS CI ON DE.Id_CIE=CI.Id_CIE WHERE CI.Letra='{letter}' GROUP BY CL.Asentamiento,CI.Letra,DI.CalendarYear,CL.Nombre_De_La_Localidad order by 3,1 desc",
+      "type": "bar",
+      "order": 1,
+      "graph_options": {
+        "x": "Nombre_De_La_Localidad",
+        "y": "NumeroDeCasosEfermedadesRespiratorias",
+        "color": "Year",
+        "barmode": "group",
+        "labels": {
+          "Nombre_De_La_Localidad": "Localidades",
+          "NumeroDeCasosEfermedadesRespiratorias": "No. de casos",
+          "Year": "Años"
+        },
+        "title": "Numero de casos de enfermedades respiratorias por localidad"
+      }
     }
   ],
   "DefaultFields": [
@@ -22,8 +70,8 @@
     {"id": 3, "name": "letter", "type": "String", "description": "Letra de la clave CIE10"}
   ],
   "DefaultGraphFields": [
-    {"default_graph_id": 1,"default_field_id": 1},
-    {"default_graph_id": 1,"default_field_id": 2},
+    {"default_graph_id": 2,"default_field_id": 1},
+    {"default_graph_id": 2,"default_field_id": 2},
     {"default_graph_id": 1,"default_field_id": 3}
   ],
   "SavedField": [

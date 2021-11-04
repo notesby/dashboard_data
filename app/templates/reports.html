@@ -3,7 +3,9 @@
 {% block header %}
     <h1>{% block title %} Reportes {% endblock %}</h1>
     {% if g.user %}
-        <a class="action" href="{{ url_for('reports.create') }}">Nuevo</a>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a class="btn btn-primary" type="button" href="{{ url_for('reports.create') }}">Nuevo reporte</a>
+        </div>
     {% endif %}
 {% endblock %}
 

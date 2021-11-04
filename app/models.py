@@ -126,6 +126,7 @@ class SavedGraph(db.Model):
     report_id = db.Column(db.Integer, db.ForeignKey('report.id'), nullable=False)
     report = db.relationship('Report', backref=db.backref('graphs', lazy=True))
     fields = db.relationship('SavedField', back_populates='graphs')
+    cache = db.Column(db.JSON, nullable=True)
     image = None
 
     def __repr__(self):
@@ -168,7 +169,7 @@ class DefaultGraph(db.Model):
         res["name"] = self.name
         res["query_text"] = self.query_text
         res["type"] = self.type
-        res["graph_options"] = self.graph_options
+        res["graph_options"] = json.dumps(self.graph_options)
         res["geojson"] = self.geojson
         res["order"] = self.order
         return res

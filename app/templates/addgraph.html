@@ -45,8 +45,28 @@
 
     </div>
 
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <button type="button" onclick="preview()" class="btn btn-primary">Vista previa</button>
 </form>
+<div id="chart" class="chart"></div>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+    var plot = null;
+    var graph = null;
+    function preview(){
+        console.log("preview");
+        Plotly.purge('chart');
+        $.post("/graph/preview", $("form").serialize())
+        .done(function (data){
+            console.log(data);
+            graph = data;
+            graph = JSON.parse(data);
+            plot = Plotly.plot('chart',graph,{});
+        });
+        return false;
+    }
+
+</script>
 <script type="text/javascript">
     var graphs = {{ graphs_json | safe }};
     var fields = {{ fields_json | safe }};
@@ -65,7 +85,7 @@
         extra_fields.forEach( el => {
             html += '<div class="mb-3">';
             html += '<label for="field_'+el["id"]+'" class="form-label">'+el["name"]+'</label>';
-            html += '<input type="text" class="form-control" id="field_'+el["id"]+'" name="field[1]['+el["name"]+']">';
+            html += '<input type="text" class="form-control" id="field_'+el["id"]+'" name="field_'+el["id"]+'">';
             html += '<div id="field_'+el["id"]+'" class="form-text">'+el["description"]+'</div>';
             html += '</div>';
         });
