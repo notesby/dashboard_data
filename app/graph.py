@@ -8,6 +8,7 @@ from app.models import db, SavedGraph, DefaultGraph, DefaultField, SavedField
 from app.models import get_connection
 from base64 import b64encode
 import pandas as pd
+from pandas import DataFrame
 import json
 import plotly
 import plotly.express as px
@@ -42,11 +43,89 @@ def get_graph_by(graph_id):
     fig = generate_graph(data, geojson, graph.graph_options, graph.type)
     graph.image = display_graph(fig, "Graph")
 
-    return render_template('notdash.html', graphJSON=graph.image["data"])
+    fields = get_fields(data)
+    values = get_fields_values(data)
+    values = json.dumps(values)
+
+    return render_template('notdash.html',
+                           graphJSON=graph.image["data"],
+                           fields=fields,
+                           values=values,
+                           graph_id=graph_id)
 
 
-@bp.route('/graph/preview', methods=['POST'])
-def preview():
+@bp.route('/graph/with-filters/<int:graph_id>/', methods=['POST'])
+def filter_graph_by(graph_id):
+    graph = SavedGraph.query.filter_by(id=graph_id).first()
+    filters = get_filters(request)
+    data = run_query(graph, graph.fields)
+    data = filter_data(data, filters)
+    geojson = None
+    if graph.geojson:
+        geojson = load_geojson(graph.geojson)
+    fig = generate_graph(data, geojson, graph.graph_options, graph.type)
+    graph.image = display_graph(fig, "Graph")
+
+    return graph.image["data"]
+
+
+def get_filters(request):
+    fkeys = request.form.keys()
+    filters = {}
+    for k in fkeys:
+        st, id, name = k.split("_")
+        if id not in filters:
+            filters[id] = {}
+        if name == "multivalue":
+            value = request.form.getlist(k)
+            filters[id][name] = value
+        else:
+            value = request.form.get(k)
+            filters[id][name] = value
+
+    return filters
+
+
+def filter_data(data: DataFrame, filters):
+    df = data
+    for key in filters:
+        ob = filters[key]
+        column = ob["field"]
+        comparator = ob["comparator"]
+        df[column] = df[column].apply(str)
+        if comparator == "eq":
+            value = ob["value"]
+            df = df.filter(like=value, axis=0)
+        elif comparator == "neq":
+            value = ob["value"]
+            df = df[~df.filter(like=value, axis=0)]
+        elif comparator == "in":
+            value = ob["multivalue"]
+            df = df[df[column].isin(value)]
+        elif comparator == "nin":
+            value = ob["multivalue"]
+            df = df[~df[column].isin(value)]
+        print(df.size)
+        print(df.head(5))
+    return df
+
+
+def get_fields(data: DataFrame):
+    fields = []
+    for col in data.columns:
+        fields.append(col)
+    return fields
+
+
+def get_fields_values(data: DataFrame):
+    values = {}
+    for col in data.columns:
+        uniques = data[col].unique().tolist()
+        values[col] = uniques
+    return values
+
+@bp.route('/<int:report_id>/graph/preview', methods=['POST'])
+def preview(report_id):
     default_graph_id = request.form['graph_id']
     name = request.form['name']
     graph_options = request.form['graph_options']
@@ -66,6 +145,7 @@ def preview():
     graph.graph_options = json.loads(graph_options)
     graph.geojson = geojson
     graph.user_id = user_id
+    graph.report_id = report_id
 
     fields = []
     for k in fkeys:
@@ -80,7 +160,7 @@ def preview():
             field.value = value
             field.default_field_id = fid
             fields.append(field)
-    data = run_query(graph, fields)
+    data = run_query(graph, fields, False)
     geojson = None
     if graph.geojson:
         geojson = load_geojson(graph.geojson)
@@ -148,7 +228,8 @@ def create(report_id):
     return render_template('addgraph.html',
                            graphs=default_graphs,
                            graphs_json=graphs_json,
-                           fields_json=fields_json)
+                           fields_json=fields_json,
+                           report_id=report_id)
 
 
 def load_geojson(file_name):
@@ -160,7 +241,7 @@ def load_geojson(file_name):
     return result
 
 
-def run_query(graph: SavedGraph, fields: list[SavedField]):
+def run_query(graph: SavedGraph, fields: list[SavedField], cache: bool = True):
     if graph.cache:
         cache = json.loads(graph.cache)
         data = pd.DataFrame.from_dict(cache)
@@ -173,10 +254,11 @@ def run_query(graph: SavedGraph, fields: list[SavedField]):
         clean_query = clean_query.replace(f"{{{field.name}}}", f"{field.value}")
     print(clean_query, file=sys.stderr)
     df1 = pd.read_sql(clean_query, connection)
-    print(df1.size, file=sys.stderr)
-    graph.cache = df1.to_json()
-    db.session.add(graph)
-    db.session.commit()
+    if cache:
+        print(df1.size, file=sys.stderr)
+        graph.cache = df1.to_json()
+        db.session.add(graph)
+        db.session.commit()
     return df1
 
 

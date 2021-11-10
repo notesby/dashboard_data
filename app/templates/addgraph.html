@@ -56,7 +56,7 @@
     function preview(){
         console.log("preview");
         Plotly.purge('chart');
-        $.post("/graph/preview", $("form").serialize())
+        $.post("/{{report_id}}/graph/preview", $("form").serialize())
         .done(function (data){
             console.log(data);
             graph = data;
